@@ -6,6 +6,7 @@ import torch.nn as nn
 import joblib
 import json
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm  # <--- 引入字体管理器，实现免依赖汉化
 from openai import OpenAI
 from model_structure import Compressor1DCNN
 
@@ -18,9 +19,31 @@ st.set_page_config(
     layout="wide"
 )
 
-# ---- 【核心优化】启用 Matplotlib 的矢量通用数学字体，彻底免疫系统缺字引发的方块乱码 ----
-plt.rcParams['font.family'] = 'sans-serif'
-plt.rcParams['mathtext.fontset'] = 'stix'
+
+# ---- 【全自动云端汉化核心】动态搜寻 Linux 服务器自带的开源中文字体 ----
+def init_matplotlib_chinese_font():
+    """全自动匹配系统可用中文字体，优先寻找云端 Linux 自带的中文字体"""
+    # 常见 Linux 云端服务器（如 Ubuntu/Debian）自带的开源中文字体族名称
+    linux_chinese_fonts = ['WenQuanYi Micro Hei', 'WenQuanYi Zen Hei', 'Droid Sans Fallback', 'Noto Sans CJK JP',
+                           'Noto Sans Mono CJK TC']
+
+    # 获取系统当前所有可用的字体名称
+    available_fonts = [f.name for f in fm.fontManager.ttflist]
+
+    # 匹配最合适的中文字体
+    selected_font = 'sans-serif'
+    for font in linux_chinese_fonts:
+        if font in available_fonts:
+            selected_font = font
+            break
+
+    # 全局注入 Matplotlib 配置，彻底免疫方块码
+    plt.rcParams['font.family'] = selected_font
+    plt.rcParams['axes.unicode_minus'] = False  # 正常显示负号
+
+
+# 执行字体初始化
+init_matplotlib_chinese_font()
 
 
 @st.cache_resource
@@ -47,7 +70,7 @@ try:
 except Exception as e:
     st.error(f"❌ 智能体核心模型组件加载失败，请检查配置文件。错误原因: {e}")
 
-# 大模型专家级 System Prompt（要求大模型用中文输出极其详尽的报告）
+# 大模型专家级 System Prompt
 SYSTEM_PROMPT = """你是一位精通机械工程、热力学与流体力学、专攻往复压缩机故障诊断的【金牌 AI 智能体】。
 用户会上传单周期示功图数据，底层神经网络（1D-CNN）和热力学几何计算工具会返回结构化指标。
 你的任务是：根据这些量化指标，撰写一份结构严谨、逻辑闭环的工业级中文技术报告。
@@ -121,19 +144,21 @@ with col2:
                     }
                 }
 
-                # ---- 【国际化 SCI 级图表渲染】单独使用学术标准英文，100% 杜绝方块码 ----
+                # ---- 【核心修改】：图表标签、标题、图例全部汉化，匹配云端中文字体 ----
                 fig, ax = plt.subplots(figsize=(6, 3.5))
-                ax.plot(volume, pressure, 'r-', linewidth=2, label="Measured p-V Curve")
+                # 1. 汉化图例标签
+                ax.plot(volume, pressure, 'r-', linewidth=2, label="实测 p-V 曲线")
 
-                # 采用标准科技论文格式配置标签
-                ax.set_title(f"Real-time p-V Diagram ({pred_label})", fontsize=11, fontweight='bold')
-                ax.set_xlabel("Volume V", fontsize=10, fontstyle='italic')
-                ax.set_ylabel("Pressure P", fontsize=10, fontstyle='italic')
+                # 2. 汉化标题与坐标轴
+                ax.set_title(f"实时动态示功图 (诊断结果: {pred_label})", fontsize=11, fontweight='bold')
+                ax.set_xlabel("容积 V", fontsize=10)
+                ax.set_ylabel("压力 P", fontsize=10)
+
                 ax.legend(loc="upper right")
                 ax.grid(True, linestyle="--", alpha=0.5)
 
                 plt.tight_layout()
-                st.pyplot(fig)  # 稳稳输出图表
+                st.pyplot(fig)  # 稳稳输出汉化图表
 
                 # 网页交互提示仍保持亲切的全中文
                 st.success(f"🎉 神经网络识别完成：检测到【{pred_label}】，置信度达 {confidence * 100:.2f}%")
