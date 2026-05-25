@@ -1,13 +1,3 @@
-import streamlit as st
-import pandas as pd
-import numpy as np
-import torch
-import joblib
-import json
-import matplotlib.pyplot as plt
-from openai import OpenAI
-from model_structure import Compressor1DCNN
-# 确保 app.py 顶部只有这一行引入网络结构
 from model_structure import Compressor1DCNN
 
 # =====================================================================
