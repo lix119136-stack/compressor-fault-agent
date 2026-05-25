@@ -31,7 +31,7 @@ def load_diagnostic_resources():
     model.eval()
 
     client = OpenAI(
-        api_key="sk-5dfe1af7504e482fb52265a4fb872619",
+        api_key=st.secrets["deepseek_key"],  # 这样外人绝对看不到你的Key
         base_url="https://api.deepseek.com/v1"
     )
     return model, label_encoder, scaler, device, client
